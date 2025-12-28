@@ -17,6 +17,7 @@ export default function DashboardPage() {
     const fetchUserData = async () => {
       if (!user) return;
       try {
+        if (!db) return;
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           setUserData({ uid: user.uid, ...userDoc.data() } as User);

@@ -21,6 +21,7 @@ export async function getDeadStockList(filters?: {
   status?: DeadStock["status"];
   sellerId?: string;
 }) {
+  if (!db) throw new Error("Firestore not initialized");
   let q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
 
   if (filters?.category) {
@@ -43,6 +44,7 @@ export async function getDeadStockList(filters?: {
 }
 
 export async function getDeadStockById(id: string): Promise<DeadStock | null> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
@@ -57,6 +59,7 @@ export async function getDeadStockById(id: string): Promise<DeadStock | null> {
 export async function createDeadStock(
   data: Omit<DeadStock, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = await addDoc(collection(db, COLLECTION), {
     ...data,
     createdAt: Timestamp.now(),
@@ -69,6 +72,7 @@ export async function updateDeadStock(
   id: string,
   data: Partial<Omit<DeadStock, "id" | "createdAt" | "updatedAt">>
 ): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   await updateDoc(docRef, {
     ...data,
@@ -77,6 +81,7 @@ export async function updateDeadStock(
 }
 
 export async function deleteDeadStock(id: string): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   await deleteDoc(doc(db, COLLECTION, id));
 }
 

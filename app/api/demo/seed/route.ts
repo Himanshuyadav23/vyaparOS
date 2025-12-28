@@ -265,7 +265,12 @@ export async function POST(request: Request) {
     ];
 
     // Add all seed data
-    const results = {
+    const results: {
+      deadStock: string[];
+      catalog: string[];
+      ledger: string[];
+      shops: string[];
+    } = {
       deadStock: [],
       catalog: [],
       ledger: [],
@@ -293,7 +298,7 @@ export async function POST(request: Request) {
     // Add shops
     for (const shop of shops) {
       const shopId = `shop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await setDoc(doc(db, "shops", shopId), {
+      await setDoc(doc(db!, "shops", shopId), {
         ...shop,
         shopId,
       });

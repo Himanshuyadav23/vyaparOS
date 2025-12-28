@@ -62,6 +62,11 @@ export default function RegisterPage() {
 
       // Check if user document exists
       if (db) {
+        if (!db) {
+          showError("Database not initialized");
+          return;
+        }
+        
         const userDoc = await getDoc(doc(db, "users", user.uid));
         
         if (!userDoc.exists()) {

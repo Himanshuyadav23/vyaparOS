@@ -21,6 +21,7 @@ export async function getCatalogItems(filters?: {
   category?: string;
   isActive?: boolean;
 }) {
+  if (!db) throw new Error("Firestore not initialized");
   let q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
 
   if (filters?.supplierId) {
@@ -43,6 +44,7 @@ export async function getCatalogItems(filters?: {
 }
 
 export async function getCatalogItemById(id: string): Promise<CatalogItem | null> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
@@ -57,6 +59,7 @@ export async function getCatalogItemById(id: string): Promise<CatalogItem | null
 export async function createCatalogItem(
   data: Omit<CatalogItem, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = await addDoc(collection(db, COLLECTION), {
     ...data,
     createdAt: Timestamp.now(),
@@ -69,6 +72,7 @@ export async function updateCatalogItem(
   id: string,
   data: Partial<Omit<CatalogItem, "id" | "createdAt" | "updatedAt">>
 ): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   await updateDoc(docRef, {
     ...data,
@@ -77,6 +81,7 @@ export async function updateCatalogItem(
 }
 
 export async function deleteCatalogItem(id: string): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   await deleteDoc(doc(db, COLLECTION, id));
 }
 

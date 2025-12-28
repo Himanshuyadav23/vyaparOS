@@ -44,3 +44,5 @@ export function openWhatsAppInquiry(
   window.open(url, "_blank");
 }
 
+
+

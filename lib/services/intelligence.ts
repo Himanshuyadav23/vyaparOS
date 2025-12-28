@@ -18,6 +18,7 @@ export async function getMarketSignals(filters?: {
   region?: string;
   limitCount?: number;
 }) {
+  if (!db) throw new Error("Firestore not initialized");
   let q = query(collection(db, COLLECTION), orderBy("timestamp", "desc"));
 
   if (filters?.category) {

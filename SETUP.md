@@ -183,3 +183,5 @@ For issues or questions, check:
 3. Network tab for API call failures
 4. Firestore rules for permission errors
 
+
+

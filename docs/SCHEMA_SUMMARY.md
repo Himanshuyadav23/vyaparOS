@@ -133,3 +133,5 @@ const stats = await getDocs(
 3. Migrate existing data from old collections to new ones
 4. Update UI components to use new field names
 
+
+

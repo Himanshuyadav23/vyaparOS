@@ -20,6 +20,7 @@ export async function getCreditTransactions(filters?: {
   debtorId?: string;
   status?: CreditTransaction["status"];
 }) {
+  if (!db) throw new Error("Firestore not initialized");
   let q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
 
   if (filters?.creditorId) {
@@ -46,6 +47,7 @@ export async function getCreditTransactions(filters?: {
 export async function createCreditTransaction(
   data: Omit<CreditTransaction, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = await addDoc(collection(db, COLLECTION), {
     ...data,
     createdAt: Timestamp.now(),
@@ -60,6 +62,7 @@ export async function updateCreditTransaction(
   id: string,
   data: Partial<Omit<CreditTransaction, "id" | "createdAt" | "updatedAt">>
 ): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   const updateData: any = {
     ...data,

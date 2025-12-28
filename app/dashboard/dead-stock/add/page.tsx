@@ -63,8 +63,12 @@ export default function AddDeadStockPage() {
 
     setLoading(true);
     try {
+      if (!db) {
+        throw new Error("Database not initialized");
+      }
+      
       // Get user data for seller name
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userDoc = await getDoc(doc(db!, "users", user.uid));
       const userData = userDoc.data();
       const sellerName = userData?.businessName || user.email || "";
 

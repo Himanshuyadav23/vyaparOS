@@ -19,7 +19,7 @@ export default function ShopCard({ shop, onContact }: ShopCardProps) {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-xl font-bold text-gray-900">{shop.shopName}</h3>
               {shop.verified && (
-                <CheckCircle className="h-5 w-5 text-green-500" title="Verified" />
+                <CheckCircle className="h-5 w-5 text-green-500" />
               )}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">

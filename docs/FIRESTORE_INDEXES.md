@@ -263,3 +263,5 @@ firebase deploy --only firestore:indexes
 
 Or create indexes manually through Firebase Console when prompted.
 
+
+

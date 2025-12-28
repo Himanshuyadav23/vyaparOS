@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   Timestamp,
   addDoc,
   doc,
@@ -185,7 +186,7 @@ export async function POST(request: Request) {
 
       if (!existing.empty) {
         // Update existing
-        const docRef = doc(db, COLLECTION, existing.docs[0].id);
+        const docRef = doc(db!, COLLECTION, existing.docs[0].id);
         await updateDoc(docRef, {
           ...stat,
           updatedAt: Timestamp.now(),

@@ -22,6 +22,7 @@ export interface MarketStatsFilters {
   category?: string;
   region?: string;
   days?: number; // Get stats for last N days
+  limit?: number; // Limit number of results
 }
 
 export async function getMarketStats(
@@ -90,4 +91,6 @@ export async function getLatestMarketStats(
     updatedAt: data.updatedAt?.toDate() || new Date(),
   } as MarketStats;
 }
+
+
 

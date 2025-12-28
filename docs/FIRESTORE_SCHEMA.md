@@ -400,3 +400,5 @@ catalogItems (1) ──< (many) inquiries
 - Market stats are readable by all authenticated users (read-only)
 - Admin users have elevated permissions
 
+
+

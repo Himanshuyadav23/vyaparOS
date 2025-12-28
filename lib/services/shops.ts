@@ -136,3 +136,5 @@ export async function deleteShop(shopId: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, shopId));
 }
 
+
+

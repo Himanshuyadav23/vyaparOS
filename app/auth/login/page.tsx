@@ -42,25 +42,29 @@ export default function LoginPage() {
       const user = result.user;
 
       // Check if user document exists
-      if (db) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!db) {
+        showError("Database not initialized");
+        return;
+      }
+      
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        
+        if (!userDoc.exists()) {
+          // Create user document for first-time Google login
+          const userData: Omit<User, "uid"> = {
+            email: user.email || "",
+            displayName: user.displayName || "",
+            businessName: user.displayName || "New Business",
+            businessType: "wholesaler",
+            role: "wholesaler",
+            verified: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
           
-          if (!userDoc.exists()) {
-            // Create user document for first-time Google login
-            const userData: Omit<User, "uid"> = {
-              email: user.email || "",
-              displayName: user.displayName || "",
-              businessName: user.displayName || "New Business",
-              businessType: "wholesaler",
-              role: "wholesaler",
-              verified: false,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            
-            try {
-              await setDoc(doc(db, "users", user.uid), {
+          try {
+            await setDoc(doc(db, "users", user.uid), {
                 ...userData,
                 uid: user.uid, // Required by security rules
               });
@@ -78,10 +82,6 @@ export default function LoginPage() {
           showError(`Database error: ${firestoreError.message}`);
           return;
         }
-      } else {
-        showError("Database not initialized. Please refresh the page.");
-        return;
-      }
 
       // Wait a bit for auth state to update
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -204,7 +204,7 @@ export default function LoginPage() {
               href="/auth/register"
               className="block text-base text-primary-600 hover:text-primary-700 font-medium"
             >
-              Don't have an account? Register
+              Don&apos;t have an account? Register
             </Link>
             <Link
               href="/demo"

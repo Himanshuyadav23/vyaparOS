@@ -104,7 +104,7 @@ export default function ShopProfilePage() {
               <div className="flex items-center gap-2 mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{shop.shopName}</h1>
                 {shop.verified && (
-                  <CheckCircle className="h-6 w-6 text-green-500" title="Verified" />
+                  <CheckCircle className="h-6 w-6 text-green-500" />
                 )}
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-500">

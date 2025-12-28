@@ -279,7 +279,7 @@ export default function SuppliersPage() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-gray-900">{supplier.businessName}</h3>
                   {supplier.verified && (
-                    <CheckCircle className="h-4 w-4 text-green-500" title="Verified" />
+                    <CheckCircle className="h-4 w-4 text-green-500" />
                   )}
                 </div>
                 <p className="text-sm text-gray-500">{supplier.contactPerson}</p>

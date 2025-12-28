@@ -20,6 +20,7 @@ export async function getSuppliers(filters?: {
   verified?: boolean;
   city?: string;
 }) {
+  if (!db) throw new Error("Firestore not initialized");
   let q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
 
   if (filters?.category) {
@@ -42,6 +43,7 @@ export async function getSuppliers(filters?: {
 }
 
 export async function getSupplierById(id: string): Promise<Supplier | null> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
@@ -56,6 +58,7 @@ export async function getSupplierById(id: string): Promise<Supplier | null> {
 export async function createSupplier(
   data: Omit<Supplier, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = await addDoc(collection(db, COLLECTION), {
     ...data,
     createdAt: Timestamp.now(),
@@ -68,6 +71,7 @@ export async function updateSupplier(
   id: string,
   data: Partial<Omit<Supplier, "id" | "createdAt" | "updatedAt">>
 ): Promise<void> {
+  if (!db) throw new Error("Firestore not initialized");
   const docRef = doc(db, COLLECTION, id);
   await updateDoc(docRef, {
     ...data,

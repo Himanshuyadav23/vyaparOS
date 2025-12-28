@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Loader2,
   Info,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -189,7 +190,7 @@ export default function DemoPage() {
         {/* Features Preview */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            What's Included in Demo
+            What&apos;s Included in Demo
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {features.map((feature) => {
@@ -227,8 +228,8 @@ export default function DemoPage() {
             How to Use Demo Mode
           </h3>
           <ol className="space-y-2 text-base text-blue-800 list-decimal list-inside">
-            <li>Click "Load Sample Data" to populate the database with demo content</li>
-            <li>Click "Login to Demo" to access the platform with demo credentials</li>
+            <li>Click &quot;Load Sample Data&quot; to populate the database with demo content</li>
+            <li>Click &quot;Login to Demo&quot; to access the platform with demo credentials</li>
             <li>Explore all modules: Dead Stock, Catalog, Ledger, Suppliers, and Market Intelligence</li>
             <li>All data is read-only in demo mode for safety</li>
           </ol>
