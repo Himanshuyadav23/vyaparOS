@@ -15,8 +15,7 @@ import CatalogCard from "@/components/catalog/CatalogCard";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import { Plus, ShoppingBag, Share2, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+// Shop info can be fetched via API if needed
 
 export default function CatalogPage() {
   const router = useRouter();
@@ -38,19 +37,10 @@ export default function CatalogPage() {
   const loadUserShop = async () => {
     if (!user) return;
     try {
-      // Get user's shop
-      const userDoc = await getDoc(doc(db!, "users", user.uid));
-      const userData = userDoc.data();
-      if (userData?.shopId) {
-        setShopId(userData.shopId);
-        const baseUrl = window.location.origin;
-        setCatalogLink(`${baseUrl}/catalog/${userData.shopId}`);
-      } else {
-        // If no shop, use userId as fallback
-        setShopId(user.uid);
-        const baseUrl = window.location.origin;
-        setCatalogLink(`${baseUrl}/catalog/${user.uid}`);
-      }
+      // Use user ID as shop ID (can be enhanced with shop API later)
+      setShopId(user.uid);
+      const baseUrl = window.location.origin;
+      setCatalogLink(`${baseUrl}/catalog/${user.uid}`);
     } catch (error) {
       console.error("Error loading shop:", error);
     }

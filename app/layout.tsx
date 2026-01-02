@@ -1,32 +1,27 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
+import "./globals.css";
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VyaparOS - Operating System for Textile Markets",
-  description: "Dead Stock Exchange, Digital Catalog, Credit Ledger, Supplier Discovery, and Market Intelligence",
+  title: "VyaparOS - Operating System for Wholesale Markets",
+  description: "Dead Stock Exchange, Digital Catalog, Credit Ledger, and Market Intelligence",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="hi">
+    <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

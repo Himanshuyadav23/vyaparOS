@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { logout } from "@/lib/firebase/auth";
 import {
   LayoutDashboard,
   Package,
@@ -16,15 +15,24 @@ import {
   X,
   LogOut,
   User,
+  Store,
+  Shield,
 } from "lucide-react";
 
-const navigation = [
+const navigation: Array<{
+  name: string;
+  href: string;
+  icon: any;
+  adminOnly?: boolean;
+}> = [
+  { name: "Marketplace", href: "/marketplace", icon: Store },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Dead Stock", href: "/dashboard/dead-stock", icon: Package },
   { name: "Catalog", href: "/dashboard/catalog", icon: ShoppingBag },
   { name: "Credit Ledger", href: "/dashboard/ledger", icon: CreditCard },
   { name: "Suppliers", href: "/dashboard/suppliers", icon: Search },
   { name: "Market Intelligence", href: "/dashboard/market", icon: BarChart3 },
+  { name: "Admin Panel", href: "/dashboard/admin", icon: Shield, adminOnly: true },
 ];
 
 interface AppLayoutProps {
@@ -35,11 +43,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      logout();
       router.push("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -78,6 +86,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
             {navigation.map((item) => {
+              // Hide admin-only items if user is not admin
+              if (item.adminOnly && user?.role !== 'admin' && user?.uid !== 'dev-user-123') {
+                return null;
+              }
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -133,6 +145,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
             {navigation.map((item) => {
+              // Hide admin-only items if user is not admin
+              if (item.adminOnly && user?.role !== 'admin' && user?.uid !== 'dev-user-123') {
+                return null;
+              }
               const isActive = pathname === item.href;
               return (
                 <Link

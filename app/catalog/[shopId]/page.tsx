@@ -6,8 +6,7 @@ import { getCatalogItems, incrementCatalogViews } from "@/lib/services/catalogIt
 import { CatalogItem } from "@/types";
 import CatalogCard from "@/components/catalog/CatalogCard";
 import { Search, Filter, ShoppingBag, Eye, MessageCircle } from "lucide-react";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+// Shop info will be fetched via API if needed
 import Loading from "@/components/ui/Loading";
 
 export default function PublicCatalogPage() {
@@ -38,25 +37,9 @@ export default function PublicCatalogPage() {
 
   const loadShopInfo = async () => {
     try {
-      if (!db) return;
-      // Try to get shop info
-      if (!db) {
-        console.error("Database not initialized");
-        setLoading(false);
-        return;
-      }
-      const shopDoc = await getDoc(doc(db, "shops", shopId));
-      if (shopDoc.exists()) {
-        setShopName(shopDoc.data().shopName || "Product Catalog");
-      } else {
-        // Fallback to user name
-        const userDoc = await getDoc(doc(db!, "users", shopId));
-        if (userDoc.exists()) {
-          setShopName(userDoc.data().businessName || "Product Catalog");
-        } else {
-          setShopName("Product Catalog");
-        }
-      }
+      // Try to get shop info via API
+      // For now, use a default name - can be enhanced with shop API later
+      setShopName("Product Catalog");
     } catch (error) {
       console.error("Error loading shop info:", error);
       setShopName("Product Catalog");

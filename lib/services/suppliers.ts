@@ -1,81 +1,64 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  query,
-  where,
-  orderBy,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Supplier } from "@/types";
-
-const COLLECTION = "suppliers";
+import { apiGet, apiPost, apiPut, apiDelete } from "./api";
 
 export async function getSuppliers(filters?: {
   category?: string;
   verified?: boolean;
   city?: string;
-}) {
-  if (!db) throw new Error("Firestore not initialized");
-  let q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
+  state?: string;
+}): Promise<Supplier[]> {
+  const params = new URLSearchParams();
+  
+  if (filters?.category) params.append("category", filters.category);
+  if (filters?.verified !== undefined) params.append("verified", String(filters.verified));
+  if (filters?.city) params.append("city", filters.city);
+  if (filters?.state) params.append("state", filters.state);
 
-  if (filters?.category) {
-    q = query(q, where("categories", "array-contains", filters.category));
+  const queryString = params.toString();
+  const endpoint = `/api/suppliers${queryString ? `?${queryString}` : ""}`;
+  
+  try {
+    const items = await apiGet<any[]>(endpoint);
+    return items.map((item) => ({
+      ...item,
+      id: item.id || item._id?.toString(),
+      createdAt: new Date(item.createdAt),
+      updatedAt: new Date(item.updatedAt),
+    })) as Supplier[];
+  } catch (error) {
+    console.error("Error fetching suppliers:", error);
+    return [];
   }
-  if (filters?.verified !== undefined) {
-    q = query(q, where("verified", "==", filters.verified));
-  }
-  if (filters?.city) {
-    q = query(q, where("city", "==", filters.city));
-  }
-
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    createdAt: doc.data().createdAt?.toDate(),
-    updatedAt: doc.data().updatedAt?.toDate(),
-  })) as Supplier[];
 }
 
 export async function getSupplierById(id: string): Promise<Supplier | null> {
-  if (!db) throw new Error("Firestore not initialized");
-  const docRef = doc(db, COLLECTION, id);
-  const docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) return null;
-  return {
-    id: docSnap.id,
-    ...docSnap.data(),
-    createdAt: docSnap.data().createdAt?.toDate(),
-    updatedAt: docSnap.data().updatedAt?.toDate(),
-  } as Supplier;
+  try {
+    const item = await apiGet<any>(`/api/suppliers/${id}`);
+    return {
+      ...item,
+      id: item.id || item._id?.toString(),
+      createdAt: new Date(item.createdAt),
+      updatedAt: new Date(item.updatedAt),
+    } as Supplier;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function createSupplier(
   data: Omit<Supplier, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
-  if (!db) throw new Error("Firestore not initialized");
-  const docRef = await addDoc(collection(db, COLLECTION), {
-    ...data,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  });
-  return docRef.id;
+  const result = await apiPost<{ id: string }>("/api/suppliers", data);
+  return result.id || result._id?.toString() || "";
 }
 
 export async function updateSupplier(
   id: string,
   data: Partial<Omit<Supplier, "id" | "createdAt" | "updatedAt">>
 ): Promise<void> {
-  if (!db) throw new Error("Firestore not initialized");
-  const docRef = doc(db, COLLECTION, id);
-  await updateDoc(docRef, {
-    ...data,
-    updatedAt: Timestamp.now(),
-  });
+  await apiPut(`/api/suppliers/${id}`, data);
 }
 
+export async function deleteSupplier(id: string): Promise<void> {
+  await apiDelete(`/api/suppliers/${id}`);
+}

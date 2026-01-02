@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { getSuppliers, createSupplier } from "@/lib/services/suppliers";
 import { Supplier } from "@/types";
 import { formatDate } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { Plus, Search, MapPin, Star, CheckCircle } from "lucide-react";
 
 export default function SuppliersPage() {
   const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -46,14 +48,30 @@ export default function SuppliersPage() {
     e.preventDefault();
     if (!user) return;
 
+    // Validate required fields on client side
+    if (!formData.businessName.trim() || !formData.contactPerson.trim() || 
+        !formData.email.trim() || !formData.phone.trim() || 
+        !formData.address.trim() || !formData.city.trim() || 
+        !formData.state.trim() || !formData.pincode.trim()) {
+      showError("Please fill in all required fields");
+      return;
+    }
+
     try {
+      // Don't send userId - API will use req.user.userId
       await createSupplier({
-        ...formData,
-        userId: user.uid,
-        rating: 0,
-        totalTransactions: 0,
-        verified: false,
+        businessName: formData.businessName.trim(),
+        contactPerson: formData.contactPerson.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        pincode: formData.pincode.trim(),
+        categories: formData.categories,
+        specialties: formData.specialties,
       });
+      showSuccess("Supplier created successfully!");
       setShowForm(false);
       setFormData({
         businessName: "",
@@ -68,9 +86,9 @@ export default function SuppliersPage() {
         specialties: [],
       });
       loadSuppliers();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating supplier:", error);
-      alert("Failed to create supplier");
+      showError(error.message || "Failed to create supplier. Please check all required fields are filled.");
     }
   };
 
@@ -147,7 +165,7 @@ export default function SuppliersPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Business Name
+                  Business Name *
                 </label>
                 <input
                   type="text"
@@ -159,7 +177,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Contact Person
+                  Contact Person *
                 </label>
                 <input
                   type="text"
@@ -171,7 +189,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
@@ -183,7 +201,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Phone
+                  Phone *
                 </label>
                 <input
                   type="tel"
@@ -195,7 +213,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  City
+                  City *
                 </label>
                 <input
                   type="text"
@@ -207,7 +225,7 @@ export default function SuppliersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  State
+                  State *
                 </label>
                 <input
                   type="text"
@@ -217,9 +235,22 @@ export default function SuppliersPage() {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Pincode *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.pincode}
+                  onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Enter pincode"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Address
+                  Address *
                 </label>
                 <input
                   type="text"

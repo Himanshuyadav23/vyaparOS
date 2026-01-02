@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { uploadImage, getImagePath } from "@/lib/firebase/storage";
+import { uploadImage, getImagePath } from "@/lib/utils/storage";
 import { X, Upload } from "lucide-react";
 
 interface ImageUploadProps {

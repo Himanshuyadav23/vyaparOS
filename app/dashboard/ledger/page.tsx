@@ -70,10 +70,14 @@ export default function LedgerPage() {
         .catch(() => null);
       const creditorName = userDoc?.businessName || user.email || "";
 
+      // Generate a debtorId from debtorName (or use a placeholder if needed)
+      // In a real app, you'd look up or create the debtor, but for now we'll generate an ID
+      const debtorId = `debtor_${formData.debtorName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}_${Date.now()}`;
+
       await createLedgerTransaction({
         creditorId: user.uid,
         creditorName,
-        debtorId: "", // For now, we'll use debtorName only
+        debtorId: debtorId,
         debtorName: formData.debtorName,
         amount: parseFloat(formData.amount),
         type: formData.type,

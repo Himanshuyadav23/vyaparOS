@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
-import { login } from "@/lib/firebase/auth";
 import {
   Package,
   ShoppingBag,
@@ -19,6 +19,7 @@ import Link from "next/link";
 
 export default function DemoPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);
@@ -26,13 +27,13 @@ export default function DemoPage() {
   const handleDemoLogin = async () => {
     setLoading(true);
     try {
-      // Demo credentials - these should be created in Firebase
+      // Demo credentials - these should be created in MongoDB
       await login("demo@vyaparos.com", "demo123456");
       showSuccess("Logged in to demo mode!");
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Demo login error:", err);
-      showError("Demo login failed. Please contact support.");
+      showError(err.message || "Demo login failed. Please make sure the demo account exists.");
     } finally {
       setLoading(false);
     }
@@ -54,6 +55,30 @@ export default function DemoPage() {
     } catch (error: any) {
       console.error("Seed error:", error);
       showError(error.message || "Failed to load demo data. Please try again.");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleSeedMockUsers = async () => {
+    setSeeding(true);
+    try {
+      const response = await fetch("/api/seed/mock-users", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to seed mock users");
+      }
+
+      const data = await response.json();
+      showSuccess(
+        `Mock users created! ${data.counts.wholesalers} wholesalers, ${data.counts.retailers} retailers, ${data.counts.catalogItems} catalog items, ${data.counts.deadStockListings} dead stock listings`
+      );
+    } catch (error: any) {
+      console.error("Seed mock users error:", error);
+      showError(error.message || "Failed to create mock users. Please try again.");
     } finally {
       setSeeding(false);
     }
@@ -184,6 +209,29 @@ export default function DemoPage() {
                 </>
               )}
             </button>
+          </div>
+          
+          <div className="mt-4">
+            <button
+              onClick={handleSeedMockUsers}
+              disabled={loading || seeding}
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 text-base font-semibold bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {seeding ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Creating Mock Users...
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5" />
+                  Create 10 Wholesalers & 7 Retailers (Central India)
+                </>
+              )}
+            </button>
+            <p className="mt-2 text-sm text-gray-500 text-center">
+              This will create realistic mock users from Central India with shops, catalog items, and dead stock listings
+            </p>
           </div>
         </div>
 

@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { createCatalogItem } from "@/lib/services/catalogItems";
-import { uploadImage, getImagePath } from "@/lib/firebase/storage";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { uploadImage, getImagePath } from "@/lib/utils/storage";
 import { Upload, X, Loader2 } from "lucide-react";
 
 export default function AddCatalogItemPage() {
@@ -64,11 +62,9 @@ export default function AddCatalogItemPage() {
 
     setLoading(true);
     try {
-      // Get user data
-      const userDoc = await getDoc(doc(db!, "users", user.uid));
-      const userData = userDoc.data();
-      const supplierName = userData?.businessName || user.email || "";
-      const shopId = userData?.shopId || user.uid;
+      // Get supplier name and shop ID from user context
+      const supplierName = user?.businessName || user?.email || "";
+      const shopId = user?.shopId || user?.uid;
 
       // Upload image if provided
       let imageUrl = "";

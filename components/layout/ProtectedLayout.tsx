@@ -13,17 +13,20 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  // Skip auth check in development mode
+  const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === "true";
+
   useEffect(() => {
-    if (!loading && !user) {
+    if (!skipAuth && !loading && !user) {
       router.push("/auth/login");
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, skipAuth]);
 
-  if (loading) {
+  if (loading && !skipAuth) {
     return <Loading />;
   }
 
-  if (!user) {
+  if (!user && !skipAuth) {
     return null;
   }
 

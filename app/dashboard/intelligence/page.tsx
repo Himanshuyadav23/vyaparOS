@@ -30,6 +30,7 @@ export default function IntelligencePage() {
 
   const loadData = async () => {
     try {
+      setLoading(true);
       const [signalsData, aggregatedData] = await Promise.all([
         getMarketSignals({ category: selectedCategory || undefined, limitCount: 50 }),
         getAggregatedSignals(selectedCategory || undefined),
@@ -38,6 +39,8 @@ export default function IntelligencePage() {
       setAggregated(aggregatedData);
     } catch (error) {
       console.error("Error loading market intelligence:", error);
+      setSignals([]);
+      setAggregated({});
     } finally {
       setLoading(false);
     }

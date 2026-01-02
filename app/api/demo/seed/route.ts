@@ -1,91 +1,79 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  addDoc,
-  Timestamp,
-  doc,
-  setDoc,
-} from "firebase/firestore";
+import connectDB from "@/lib/mongodb/connect";
+import DeadStockListing from "@/lib/mongodb/models/DeadStockListing";
+import CatalogItem from "@/lib/mongodb/models/CatalogItem";
+import LedgerTransaction from "@/lib/mongodb/models/LedgerTransaction";
+import Shop from "@/lib/mongodb/models/Shop";
+import { v4 as uuidv4 } from 'uuid';
 
 const DEMO_USER_ID = "demo_user_12345";
 
 export async function POST(request: Request) {
   try {
-    if (!db) {
-      return NextResponse.json(
-        { error: "Database not initialized" },
-        { status: 500 }
-      );
-    }
+    await connectDB();
 
     // Seed Dead Stock Listings
     const deadStockListings = [
       {
+        listingId: uuidv4(),
         sellerId: DEMO_USER_ID,
         sellerName: "Demo Wholesaler",
         productName: "Cotton Fabric - White",
         category: "Cotton",
         description: "Premium quality white cotton fabric, 100% cotton, suitable for shirts and dresses",
         quantity: 500,
-        minQty: 50,
         originalPrice: 120,
         discountPrice: 85,
         discountPercent: 29,
-        condition: "new",
+        condition: "new" as const,
         images: [],
-        status: "available",
+        status: "available" as const,
         location: { city: "Mumbai", state: "Maharashtra" },
         views: 45,
         inquiries: 8,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        listingId: uuidv4(),
         sellerId: DEMO_USER_ID,
         sellerName: "Demo Wholesaler",
         productName: "Silk Saree Material",
         category: "Silk",
         description: "Beautiful silk fabric for sarees, premium quality",
         quantity: 200,
-        minQty: 20,
         originalPrice: 450,
         discountPrice: 320,
         discountPercent: 29,
-        condition: "like_new",
+        condition: "like_new" as const,
         images: [],
-        status: "available",
+        status: "available" as const,
         location: { city: "Surat", state: "Gujarat" },
         views: 78,
         inquiries: 12,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        listingId: uuidv4(),
         sellerId: DEMO_USER_ID,
         sellerName: "Demo Wholesaler",
         productName: "Denim Fabric - Blue",
         category: "Denim",
         description: "Heavy duty denim fabric, perfect for jeans manufacturing",
         quantity: 300,
-        minQty: 30,
         originalPrice: 180,
         discountPrice: 130,
         discountPercent: 28,
-        condition: "new",
+        condition: "new" as const,
         images: [],
-        status: "available",
+        status: "available" as const,
         location: { city: "Ahmedabad", state: "Gujarat" },
         views: 32,
         inquiries: 5,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
     ];
 
     // Seed Catalog Items
     const catalogItems = [
       {
+        catalogId: uuidv4(),
         supplierId: DEMO_USER_ID,
         supplierName: "Demo Wholesaler",
         productName: "Premium Cotton Shirt Fabric",
@@ -101,10 +89,9 @@ export async function POST(request: Request) {
         isActive: true,
         views: 120,
         inquiries: 25,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        catalogId: uuidv4(),
         supplierId: DEMO_USER_ID,
         supplierName: "Demo Wholesaler",
         productName: "Silk Saree Fabric",
@@ -120,10 +107,9 @@ export async function POST(request: Request) {
         isActive: true,
         views: 200,
         inquiries: 45,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        catalogId: uuidv4(),
         supplierId: DEMO_USER_ID,
         supplierName: "Demo Wholesaler",
         productName: "Polyester Blend Fabric",
@@ -139,61 +125,57 @@ export async function POST(request: Request) {
         isActive: true,
         views: 95,
         inquiries: 18,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
     ];
 
     // Seed Ledger Transactions
     const ledgerTransactions = [
       {
+        transactionId: uuidv4(),
         creditorId: DEMO_USER_ID,
         creditorName: "Demo Wholesaler",
         debtorId: "debtor_1",
         debtorName: "Retailer ABC",
         amount: 50000,
-        type: "credit",
+        type: "credit" as const,
         description: "Credit sale of cotton fabric",
-        dueDate: Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
-        status: "pending",
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        status: "pending" as const,
       },
       {
+        transactionId: uuidv4(),
         creditorId: DEMO_USER_ID,
         creditorName: "Demo Wholesaler",
         debtorId: "debtor_2",
         debtorName: "Retailer XYZ",
         amount: 35000,
-        type: "credit",
+        type: "credit" as const,
         description: "Credit sale of silk fabric",
-        dueDate: Timestamp.fromDate(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)),
-        paidDate: Timestamp.fromDate(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)),
-        status: "paid",
-        createdAt: Timestamp.fromDate(new Date(Date.now() - 20 * 24 * 60 * 60 * 1000)),
-        updatedAt: Timestamp.now(),
+        dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        paidDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        status: "paid" as const,
       },
       {
+        transactionId: uuidv4(),
         creditorId: DEMO_USER_ID,
         creditorName: "Demo Wholesaler",
         debtorId: "debtor_3",
         debtorName: "Retailer PQR",
         amount: 25000,
-        type: "credit",
+        type: "credit" as const,
         description: "Credit sale of denim fabric",
-        dueDate: Timestamp.fromDate(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)),
-        status: "overdue",
-        createdAt: Timestamp.fromDate(new Date(Date.now() - 25 * 24 * 60 * 60 * 1000)),
-        updatedAt: Timestamp.now(),
+        dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        status: "overdue" as const,
       },
     ];
 
     // Seed Shops
     const shops = [
       {
+        shopId: uuidv4(),
         ownerId: DEMO_USER_ID,
         shopName: "Premium Textiles Wholesale",
-        shopType: "wholesale",
+        shopType: "wholesale" as const,
         address: {
           street: "123 Textile Market",
           city: "Mumbai",
@@ -211,13 +193,12 @@ export async function POST(request: Request) {
         totalRatings: 45,
         verified: true,
         isActive: true,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        shopId: uuidv4(),
         ownerId: "shop_owner_2",
         shopName: "Silk Paradise Wholesale",
-        shopType: "wholesale",
+        shopType: "wholesale" as const,
         address: {
           street: "456 Fabric Street",
           city: "Surat",
@@ -235,13 +216,12 @@ export async function POST(request: Request) {
         totalRatings: 32,
         verified: true,
         isActive: true,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
       {
+        shopId: uuidv4(),
         ownerId: "shop_owner_3",
         shopName: "Denim Experts",
-        shopType: "wholesale",
+        shopType: "wholesale" as const,
         address: {
           street: "789 Denim Lane",
           city: "Ahmedabad",
@@ -259,8 +239,6 @@ export async function POST(request: Request) {
         totalRatings: 28,
         verified: true,
         isActive: true,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
       },
     ];
 
@@ -279,30 +257,30 @@ export async function POST(request: Request) {
 
     // Add dead stock listings
     for (const listing of deadStockListings) {
-      const docRef = await addDoc(collection(db, "deadStockListings"), listing);
-      results.deadStock.push(docRef.id);
+      const doc = new DeadStockListing(listing);
+      await doc.save();
+      results.deadStock.push(doc.listingId);
     }
 
     // Add catalog items
     for (const item of catalogItems) {
-      const docRef = await addDoc(collection(db, "catalogItems"), item);
-      results.catalog.push(docRef.id);
+      const doc = new CatalogItem(item);
+      await doc.save();
+      results.catalog.push(doc.catalogId);
     }
 
     // Add ledger transactions
     for (const transaction of ledgerTransactions) {
-      const docRef = await addDoc(collection(db, "ledgerTransactions"), transaction);
-      results.ledger.push(docRef.id);
+      const doc = new LedgerTransaction(transaction);
+      await doc.save();
+      results.ledger.push(doc.transactionId);
     }
 
     // Add shops
     for (const shop of shops) {
-      const shopId = `shop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await setDoc(doc(db!, "shops", shopId), {
-        ...shop,
-        shopId,
-      });
-      results.shops.push(shopId);
+      const doc = new Shop(shop);
+      await doc.save();
+      results.shops.push(doc.shopId);
     }
 
     return NextResponse.json({
@@ -323,4 +301,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { createDeadStockListing } from "@/lib/services/deadStockListings";
-import { uploadImage, getImagePath } from "@/lib/firebase/storage";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { uploadImage, getImagePath } from "@/lib/utils/storage";
 import { Upload, X, Loader2 } from "lucide-react";
 
 export default function AddDeadStockPage() {
@@ -63,14 +61,8 @@ export default function AddDeadStockPage() {
 
     setLoading(true);
     try {
-      if (!db) {
-        throw new Error("Database not initialized");
-      }
-      
-      // Get user data for seller name
-      const userDoc = await getDoc(doc(db!, "users", user.uid));
-      const userData = userDoc.data();
-      const sellerName = userData?.businessName || user.email || "";
+      // Get seller name from user context
+      const sellerName = user?.businessName || user?.email || "";
 
       // Upload image if provided
       let imageUrl = "";

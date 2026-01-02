@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
-import { register, loginWithGoogle } from "@/lib/firebase/auth";
-import { db } from "@/lib/firebase";
-import { collection, doc, setDoc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { User } from "@/types";
-import { Chrome } from "lucide-react";
+import { loadGoogleScript, initializeGoogleSignIn } from "@/lib/auth/google";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { user, register } = useAuth();
   const { showError, showSuccess } = useToast();
   const [formData, setFormData] = useState({
     email: "",
@@ -21,29 +20,85 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  // Redirect if already logged in
+  if (user) {
+    router.push("/dashboard");
+    return null;
+  }
+
+  useEffect(() => {
+    // Initialize Google Sign-In
+    const initGoogle = async () => {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        console.warn("Google Client ID not configured");
+        return;
+      }
+
+      try {
+        await loadGoogleScript();
+        await initializeGoogleSignIn(clientId, handleGoogleCallback);
+        
+        // Render button
+        if (googleButtonRef.current && window.google?.accounts) {
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'signup_with',
+          });
+        }
+      } catch (error) {
+        console.error("Failed to initialize Google Sign-In:", error);
+      }
+    };
+
+    initGoogle();
+  }, []);
+
+  const handleGoogleCallback = async (response: any) => {
+    if (!response.credential) {
+      showError("Google sign-up failed");
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: response.credential, isSignUp: true }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Google sign-up failed");
+      }
+
+      const data = await res.json();
+      localStorage.setItem("token", data.token);
+      
+      showSuccess("Account created successfully with Google!");
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      showError(err.message || "Google sign-up failed. Please try again.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const userCredential = await register(formData.email, formData.password);
-      const user = userCredential.user;
-
-      // Create user document in Firestore
-      const userData: Omit<User, "uid"> = {
-        email: user.email!,
+      await register({
+        email: formData.email,
+        password: formData.password,
         businessName: formData.businessName,
         businessType: formData.businessType,
-        role: formData.businessType === "wholesaler" ? "wholesaler" : "retailer",
-        verified: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      await setDoc(doc(db!, "users", user.uid), {
-        ...userData,
-        uid: user.uid, // Required by security rules
       });
       showSuccess("Account created successfully!");
       router.push("/dashboard");
@@ -51,71 +106,6 @@ export default function RegisterPage() {
       showError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setGoogleLoading(true);
-    try {
-      const result = await loginWithGoogle();
-      const user = result.user;
-
-      // Check if user document exists
-      if (db) {
-        if (!db) {
-          showError("Database not initialized");
-          return;
-        }
-        
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        
-        if (!userDoc.exists()) {
-          // Create user document for first-time Google sign-up
-          const userData: Omit<User, "uid"> = {
-            email: user.email || "",
-            displayName: user.displayName || "",
-            businessName: user.displayName || formData.businessName || "New Business",
-            businessType: formData.businessType,
-            role: formData.businessType === "wholesaler" ? "wholesaler" : "retailer",
-            verified: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          await setDoc(doc(db, "users", user.uid), {
-            ...userData,
-            uid: user.uid, // Required by security rules
-          });
-        }
-      }
-
-      // Wait a bit for auth state to update
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      showSuccess("Account created successfully with Google!");
-      // Use window.location for a full page reload to ensure auth state is updated
-      window.location.href = "/dashboard";
-    } catch (err: any) {
-      console.error("Google sign-up error:", err);
-      if (err.code === "auth/popup-closed-by-user") {
-        showError("Sign-up popup was closed. Please try again.");
-      } else if (err.code === "auth/popup-blocked") {
-        showError("Popup was blocked. Please allow popups and try again.");
-      } else if (err.code === "auth/email-already-in-use" || err.code === "auth/account-exists-with-different-credential") {
-        // Account already exists - redirect to login
-        const email = err.customData?.email || err.email;
-        showError("This email is already registered. Redirecting to login page...");
-        setTimeout(() => {
-          if (email) {
-            router.push(`/auth/login?email=${encodeURIComponent(email)}`);
-          } else {
-            router.push("/auth/login");
-          }
-        }, 2000);
-      } else {
-        showError(err.message || "Google sign-up failed. Please try again.");
-      }
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -213,24 +203,12 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              disabled={loading || googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-gray-300 rounded-lg shadow-sm text-base font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-            >
-              {googleLoading ? (
-                <>
-                  <div className="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  <Chrome className="h-5 w-5" />
-                  Sign up with Google
-                </>
-              )}
-            </button>
+            <div id="google-signup-button" ref={googleButtonRef}></div>
+            {googleLoading && (
+              <div className="text-center text-sm text-gray-500">
+                Creating account with Google...
+              </div>
+            )}
           </div>
 
           <div className="text-center">
