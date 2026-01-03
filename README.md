@@ -2,6 +2,8 @@
 
 An operating system for traditional wholesale textile markets - a production-grade MVP.
 
+<!-- Deployment trigger -->
+
 ## Features
 
 1. **Dead Stock Exchange** - Buy and sell excess inventory
