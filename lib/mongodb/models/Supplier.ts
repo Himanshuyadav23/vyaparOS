@@ -46,5 +46,8 @@ SupplierSchema.index({ city: 1, verified: 1 });
 SupplierSchema.index({ state: 1, categories: 1 });
 SupplierSchema.index({ rating: -1 });
 
-export default mongoose.models.Supplier || mongoose.model<ISupplier>('Supplier', SupplierSchema);
+const SupplierModel = mongoose.models.Supplier || mongoose.model<ISupplier>('Supplier', SupplierSchema);
+export default SupplierModel as mongoose.Model<ISupplier>;
+
+
 

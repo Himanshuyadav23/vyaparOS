@@ -11,6 +11,7 @@ interface User {
   businessType: "wholesaler" | "retailer" | "manufacturer";
   role?: "wholesaler" | "retailer" | "admin";
   phone?: string;
+  shopId?: string;
   address?: {
     street: string;
     city: string;

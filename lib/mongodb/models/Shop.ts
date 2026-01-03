@@ -90,5 +90,8 @@ ShopSchema.index({ 'address.city': 1, shopType: 1, isActive: 1 });
 ShopSchema.index({ 'address.state': 1, categories: 1 });
 ShopSchema.index({ rating: -1 });
 
-export default mongoose.models.Shop || mongoose.model<IShop>('Shop', ShopSchema);
+const ShopModel = mongoose.models.Shop || mongoose.model<IShop>('Shop', ShopSchema);
+export default ShopModel as mongoose.Model<IShop>;
+
+
 

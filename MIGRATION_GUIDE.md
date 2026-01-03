@@ -139,3 +139,5 @@ A migration script can be created if needed.
 5. Configure CORS if needed
 6. Set up cloud storage for production file uploads
 
+
+

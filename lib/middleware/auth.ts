@@ -15,9 +15,9 @@ function isDevMode(): boolean {
 }
 
 export function withAuth(
-  handler: (req: AuthenticatedRequest) => Promise<NextResponse>
+  handler: (req: AuthenticatedRequest, context?: { params?: Promise<{ [key: string]: string }> }) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, context?: { params?: Promise<{ [key: string]: string }> }) => {
     // In dev mode with SKIP_AUTH, allow requests through with mock user
     if (isDevMode()) {
       (req as AuthenticatedRequest).user = {
@@ -25,7 +25,7 @@ export function withAuth(
         email: 'dev@vyaparos.com',
         role: 'admin',
       };
-      return handler(req as AuthenticatedRequest);
+      return handler(req as AuthenticatedRequest, context);
     }
 
     const token = getTokenFromRequest(req);
@@ -47,14 +47,14 @@ export function withAuth(
     }
 
     (req as AuthenticatedRequest).user = payload;
-    return handler(req as AuthenticatedRequest);
+    return handler(req as AuthenticatedRequest, context);
   };
 }
 
 export function withOptionalAuth(
-  handler: (req: AuthenticatedRequest) => Promise<NextResponse>
+  handler: (req: AuthenticatedRequest, context?: { params?: Promise<{ [key: string]: string }> }) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, context?: { params?: Promise<{ [key: string]: string }> }) => {
     // In dev mode with SKIP_AUTH, set mock user
     if (isDevMode()) {
       (req as AuthenticatedRequest).user = {
@@ -62,7 +62,7 @@ export function withOptionalAuth(
         email: 'dev@vyaparos.com',
         role: 'admin',
       };
-      return handler(req as AuthenticatedRequest);
+      return handler(req as AuthenticatedRequest, context);
     }
 
     const token = getTokenFromRequest(req);
@@ -74,7 +74,7 @@ export function withOptionalAuth(
       }
     }
 
-    return handler(req as AuthenticatedRequest);
+    return handler(req as AuthenticatedRequest, context);
   };
 }
 

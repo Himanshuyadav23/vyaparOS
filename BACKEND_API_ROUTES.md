@@ -124,3 +124,5 @@ curl http://localhost:3000/api/catalog-items
 
 The backend is fully functional for the main features (auth, catalog, dead stock, ledger). Some additional routes (suppliers, shops, market signals) need to be created if you want to use those features.
 
+
+

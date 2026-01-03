@@ -75,5 +75,6 @@ DeadStockListingSchema.index({ status: 1, 'location.city': 1, createdAt: -1 });
 DeadStockListingSchema.index({ status: 1, discountPercent: -1 });
 DeadStockListingSchema.index({ createdAt: -1 });
 
-export default mongoose.models.DeadStockListing || mongoose.model<IDeadStockListing>('DeadStockListing', DeadStockListingSchema);
+const DeadStockListingModel = mongoose.models.DeadStockListing || mongoose.model<IDeadStockListing>('DeadStockListing', DeadStockListingSchema);
+export default DeadStockListingModel as mongoose.Model<IDeadStockListing>;
 

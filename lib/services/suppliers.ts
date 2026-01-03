@@ -46,9 +46,9 @@ export async function getSupplierById(id: string): Promise<Supplier | null> {
 }
 
 export async function createSupplier(
-  data: Omit<Supplier, "id" | "createdAt" | "updatedAt">
+  data: Partial<Omit<Supplier, "id" | "createdAt" | "updatedAt" | "verified" | "rating" | "userId" | "totalTransactions">>
 ): Promise<string> {
-  const result = await apiPost<{ id: string }>("/api/suppliers", data);
+  const result = await apiPost<{ id: string; _id?: string }>("/api/suppliers", data);
   return result.id || result._id?.toString() || "";
 }
 

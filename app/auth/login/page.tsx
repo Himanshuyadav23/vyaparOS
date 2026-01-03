@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
+import Loading from "@/components/ui/Loading";
 import { loadGoogleScript, initializeGoogleSignIn } from "@/lib/auth/google";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, login, loading: authLoading } = useAuth();
   const { showError, showSuccess } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,10 +19,11 @@ export default function LoginPage() {
   const googleButtonRef = useRef<HTMLDivElement>(null);
 
   // Redirect if already logged in
-  if (user) {
-    router.push("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, router, authLoading]);
 
   useEffect(() => {
     // Initialize Google Sign-In
@@ -91,13 +93,23 @@ export default function LoginPage() {
     try {
       await login(email, password);
       showSuccess("Login successful!");
-      router.push("/dashboard");
+      // Use window.location to ensure full page reload and auth state refresh
+      window.location.href = "/dashboard";
     } catch (err: any) {
       showError(err.message || "Login failed. Please check your email and password.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while checking auth or redirecting
+  if (authLoading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

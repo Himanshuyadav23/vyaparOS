@@ -68,5 +68,8 @@ LedgerTransactionSchema.index({ debtorId: 1, status: 1, createdAt: -1 });
 LedgerTransactionSchema.index({ status: 1, dueDate: 1 });
 LedgerTransactionSchema.index({ createdAt: -1 });
 
-export default mongoose.models.LedgerTransaction || mongoose.model<ILedgerTransaction>('LedgerTransaction', LedgerTransactionSchema);
+const LedgerTransactionModel = mongoose.models.LedgerTransaction || mongoose.model<ILedgerTransaction>('LedgerTransaction', LedgerTransactionSchema);
+export default LedgerTransactionModel as mongoose.Model<ILedgerTransaction>;
+
+
 

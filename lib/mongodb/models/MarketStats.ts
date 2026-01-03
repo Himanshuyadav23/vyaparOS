@@ -54,5 +54,8 @@ const MarketStatsSchema = new Schema<IMarketStats>(
 MarketStatsSchema.index({ date: -1, category: 1, signalType: 1 });
 MarketStatsSchema.index({ date: -1, region: 1, signalType: 1 });
 
-export default mongoose.models.MarketStats || mongoose.model<IMarketStats>('MarketStats', MarketStatsSchema);
+const MarketStatsModel = mongoose.models.MarketStats || mongoose.model<IMarketStats>('MarketStats', MarketStatsSchema);
+export default MarketStatsModel as mongoose.Model<IMarketStats>;
+
+
 

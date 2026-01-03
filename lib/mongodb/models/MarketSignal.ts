@@ -36,5 +36,8 @@ const MarketSignalSchema = new Schema<IMarketSignal>(
 MarketSignalSchema.index({ category: 1, signalType: 1, timestamp: -1 });
 MarketSignalSchema.index({ region: 1, timestamp: -1 });
 
-export default mongoose.models.MarketSignal || mongoose.model<IMarketSignal>('MarketSignal', MarketSignalSchema);
+const MarketSignalModel = mongoose.models.MarketSignal || mongoose.model<IMarketSignal>('MarketSignal', MarketSignalSchema);
+export default MarketSignalModel as mongoose.Model<IMarketSignal>;
+
+
 

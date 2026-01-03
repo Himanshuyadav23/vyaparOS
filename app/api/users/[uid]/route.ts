@@ -47,3 +47,5 @@ async function deleteHandler(req: any, context: { params: Promise<{ uid: string 
 
 export const DELETE = withAuth(deleteHandler);
 
+
+

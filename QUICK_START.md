@@ -52,3 +52,5 @@ If you see MongoDB connection errors:
 - See `SETUP_MERN.md` for detailed setup instructions
 - See `MIGRATION_GUIDE.md` for migration details
 
+
+

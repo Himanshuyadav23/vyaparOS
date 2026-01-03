@@ -71,5 +71,6 @@ UserSchema.index({ businessType: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ 'address.city': 1 });
 
-export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const UserModel = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export default UserModel as mongoose.Model<IUser>;
 

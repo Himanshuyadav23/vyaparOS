@@ -65,5 +65,8 @@ CatalogItemSchema.index({ isFeatured: 1, isActive: 1, createdAt: -1 });
 CatalogItemSchema.index({ shopId: 1 });
 CatalogItemSchema.index({ tags: 1 });
 
-export default mongoose.models.CatalogItem || mongoose.model<ICatalogItem>('CatalogItem', CatalogItemSchema);
+const CatalogItemModel = mongoose.models.CatalogItem || mongoose.model<ICatalogItem>('CatalogItem', CatalogItemSchema);
+export default CatalogItemModel as mongoose.Model<ICatalogItem>;
+
+
 

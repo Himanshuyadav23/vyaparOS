@@ -35,3 +35,5 @@ async function getHandler(req: any) {
 
 export const GET = withAuth(getHandler);
 
+
+

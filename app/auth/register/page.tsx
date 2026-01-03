@@ -101,7 +101,8 @@ export default function RegisterPage() {
         businessType: formData.businessType,
       });
       showSuccess("Account created successfully!");
-      router.push("/dashboard");
+      // Use window.location to ensure full page reload and auth state refresh
+      window.location.href = "/dashboard";
     } catch (err: any) {
       showError(err.message || "Registration failed. Please try again.");
     } finally {

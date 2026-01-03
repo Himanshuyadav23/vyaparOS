@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb/connect';
-import User from '@/lib/mongodb/models/User';
+import User, { IUser } from '@/lib/mongodb/models/User';
 import { generateToken } from '@/lib/auth/jwt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const googleUser = await verifyGoogleToken(idToken);
 
     // Check if user exists
-    let user = await User.findOne({ email: googleUser.email.toLowerCase() });
+    let user = await (User as any).findOne({ email: googleUser.email.toLowerCase() }).exec() as IUser | null;
 
     if (!user) {
       if (!isSignUp) {

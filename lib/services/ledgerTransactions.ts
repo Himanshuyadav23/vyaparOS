@@ -1,5 +1,5 @@
 import { CreditTransaction } from "@/types";
-import { apiGet, apiPost, apiPut } from "./api";
+import { apiGet, apiPost, apiPut, apiDelete } from "./api";
 
 export interface LedgerTransactionFilters {
   creditorId?: string;
