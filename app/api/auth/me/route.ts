@@ -7,12 +7,28 @@ async function handler(req: any) {
   try {
     await connectDB();
 
+    // Verify we have a valid user ID from token
+    if (!req.user || !req.user.userId) {
+      return NextResponse.json(
+        { error: 'Invalid authentication token' },
+        { status: 401 }
+      );
+    }
+
     const user = await User.findOne({ uid: req.user.userId }).select('-password');
     
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
+      );
+    }
+
+    // Verify token email matches user email (additional security check)
+    if (req.user.email && req.user.email.toLowerCase() !== user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Token mismatch - authentication failed' },
+        { status: 401 }
       );
     }
 

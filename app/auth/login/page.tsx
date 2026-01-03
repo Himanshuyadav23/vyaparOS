@@ -63,6 +63,9 @@ export default function LoginPage() {
 
     setGoogleLoading(true);
     try {
+      // Clear any existing token first
+      localStorage.removeItem("token");
+      
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,9 +78,10 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
+      // Set new token
       localStorage.setItem("token", data.token);
       
-      // Refresh auth context
+      // Refresh auth context and redirect
       window.location.href = "/dashboard";
     } catch (err: any) {
       showError(err.message || "Google login failed. Please try again.");

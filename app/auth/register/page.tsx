@@ -66,6 +66,9 @@ export default function RegisterPage() {
 
     setGoogleLoading(true);
     try {
+      // Clear any existing token first
+      localStorage.removeItem("token");
+      
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,6 +81,7 @@ export default function RegisterPage() {
       }
 
       const data = await res.json();
+      // Set new token
       localStorage.setItem("token", data.token);
       
       showSuccess("Account created successfully with Google!");

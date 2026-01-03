@@ -88,14 +88,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const token = localStorage.getItem("token");
       if (!token) {
+        setUser(null);
         setLoading(false);
         return;
       }
 
+      // Verify token is valid by calling /api/auth/me
       const data = await apiGet<{ user: User }>("/api/auth/me");
-      setUser(data.user);
+      // Ensure we have valid user data
+      if (data && data.user && data.user.uid) {
+        setUser(data.user);
+      } else {
+        // Invalid response, clear token
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     } catch (error) {
       console.error("Auth check failed:", error);
+      // Clear invalid token
       localStorage.removeItem("token");
       setUser(null);
     } finally {
@@ -108,6 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Clear any existing token first
+    localStorage.removeItem("token");
+    setUser(null);
+    
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -120,11 +134,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = await response.json();
+    // Set new token and user
     localStorage.setItem("token", data.token);
     setUser(data.user);
   };
 
   const register = async (registerData: RegisterData) => {
+    // Clear any existing token first
+    localStorage.removeItem("token");
+    setUser(null);
+    
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -137,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const data = await response.json();
+    // Set new token and user
     localStorage.setItem("token", data.token);
     setUser(data.user);
   };

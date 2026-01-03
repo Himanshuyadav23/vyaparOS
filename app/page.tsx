@@ -147,6 +147,9 @@ export default function LandingPage() {
 
     setGoogleLoading(true);
     try {
+      // Clear any existing token first
+      localStorage.removeItem("token");
+      
       // Try sign-in first, if fails, try sign-up
       let res = await fetch("/api/auth/google", {
         method: "POST",
@@ -169,6 +172,7 @@ export default function LandingPage() {
       }
 
       const data = await res.json();
+      // Set new token
       localStorage.setItem("token", data.token);
       
       showSuccess("Authentication successful!");
