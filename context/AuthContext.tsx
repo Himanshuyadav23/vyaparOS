@@ -65,10 +65,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      // Development mode: Skip authentication
+      const token = localStorage.getItem("token");
+      
+      // If there's a token, always use real authentication (ignore SKIP_AUTH)
+      if (token) {
+        // Verify token is valid by calling /api/auth/me
+        const data = await apiGet<{ user: User }>("/api/auth/me");
+        // Ensure we have valid user data
+        if (data && data.user && data.user.uid) {
+          setUser(data.user);
+        } else {
+          // Invalid response, clear token
+          localStorage.removeItem("token");
+          setUser(null);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Only use dev mode if no token exists AND SKIP_AUTH is enabled
       const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === "true";
       if (skipAuth) {
-        // Create a mock user for development
+        // Create a mock user for development (only when no real token exists)
         const mockUser: User = {
           uid: "dev-user-123",
           email: "dev@vyaparos.com",
@@ -80,35 +98,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        // No need to set token - middleware will handle it
         setUser(mockUser);
         setLoading(false);
         return;
       }
 
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // Verify token is valid by calling /api/auth/me
-      const data = await apiGet<{ user: User }>("/api/auth/me");
-      // Ensure we have valid user data
-      if (data && data.user && data.user.uid) {
-        setUser(data.user);
-      } else {
-        // Invalid response, clear token
-        localStorage.removeItem("token");
-        setUser(null);
-      }
+      // No token and no skip auth - user is not logged in
+      setUser(null);
+      setLoading(false);
     } catch (error) {
       console.error("Auth check failed:", error);
       // Clear invalid token
       localStorage.removeItem("token");
       setUser(null);
-    } finally {
       setLoading(false);
     }
   };
