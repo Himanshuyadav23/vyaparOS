@@ -154,5 +154,9 @@ npm run lint
 
 Proprietary - All rights reserved
 
+## Developer
+
+Built by [Himanshu Yadav](https://hyadav.tech) - Co-Founder DCOMM | Indore, India
+
 
 

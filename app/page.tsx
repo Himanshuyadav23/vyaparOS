@@ -276,6 +276,17 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="mt-8 text-sm">© {new Date().getFullYear()} VyaparOS. All rights reserved.</p>
+            <p className="mt-2 text-xs text-gray-500">
+              Built by{" "}
+              <a
+                href="https://hyadav.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gray-400 transition-colors"
+              >
+                Himanshu Yadav
+              </a>
+            </p>
           </div>
         </div>
       </footer>

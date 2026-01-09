@@ -224,9 +224,29 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="py-6">
+        <main className="py-6 pb-20">
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
+
+        {/* Footer */}
+        <footer className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-gray-200 py-2 z-10">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center text-xs text-gray-500">
+              <span>© {new Date().getFullYear()} VyaparOS</span>
+              <span>
+                Built by{" "}
+                <a
+                  href="https://hyadav.tech"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-700 transition-colors"
+                >
+                  Himanshu Yadav
+                </a>
+              </span>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
