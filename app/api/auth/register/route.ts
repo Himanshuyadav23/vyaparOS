@@ -4,19 +4,91 @@ import User from '@/lib/mongodb/models/User';
 import { hashPassword } from '@/lib/auth/password';
 import { generateToken } from '@/lib/auth/jwt';
 import { v4 as uuidv4 } from 'uuid';
+import { registerRateLimiter, getClientIdentifier } from '@/lib/security/rateLimiter';
+import { 
+  sanitizeEmail, 
+  isValidEmail, 
+  sanitizeString, 
+  sanitizePhone, 
+  isValidPhone,
+  validatePasswordStrength,
+  sanitizeObject,
+} from '@/lib/security/validator';
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    const body = await req.json();
-    const { email, password, displayName, businessName, businessType, phone, address } = body;
+    // Rate limiting
+    const clientId = getClientIdentifier(req as any);
+    const rateLimitResult = registerRateLimiter.check(clientId, '/api/auth/register');
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Too many registration attempts',
+          message: 'Please try again later',
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
 
+    const body = await req.json();
+    let { email, password, displayName, businessName, businessType, phone, address } = body;
+
+    // Validate required fields
     if (!email || !password || !businessName || !businessType) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // Sanitize and validate email
+    email = sanitizeEmail(email);
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
+      return NextResponse.json(
+        { 
+          error: 'Password does not meet requirements',
+          errors: passwordValidation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize other fields
+    displayName = displayName ? sanitizeString(displayName) : undefined;
+    businessName = sanitizeString(businessName);
+    businessType = sanitizeString(businessType);
+    phone = phone ? sanitizePhone(phone) : undefined;
+    
+    // Validate phone if provided
+    if (phone && !isValidPhone(phone)) {
+      return NextResponse.json(
+        { error: 'Invalid phone number format' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize address if provided
+    if (address && typeof address === 'object') {
+      address = sanitizeObject(address);
+    } else if (address && typeof address === 'string') {
+      address = sanitizeString(address);
     }
 
     // Check if user already exists
